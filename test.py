@@ -2,7 +2,6 @@ import numpy as np
 from keras.models import load_model
 
 def predict(state, empty=0, me=1, you=2, model_name='gomoku.hdf5'):
-    if min(state) == 0 and max(state) == 0: return [(8, 8)]
     x = np.zeros((1, 17, 17, 1))
     for i in range(17):
         for j in range(17):
@@ -18,7 +17,7 @@ def predict(state, empty=0, me=1, you=2, model_name='gomoku.hdf5'):
     ret = []
     for i in range(17):
         for j in range(17):
-            if y[i, j] > 0 and x[0, i, j, 0] == empty:
+            if y[i, j] >= 0.01 and x[0, i, j, 0] == empty:
                 ret.append(((i, j), y[i, j]))
 
     ret.sort(key=lambda t: t[1], reverse=True)
@@ -29,4 +28,8 @@ if __name__ == '__main__':
     print(predict(state))
 
     state[8*17+8] = 2
+    print(predict(state))
+
+    state[9*17+8] = 1
+    state[8*17+9] = 2
     print(predict(state))
