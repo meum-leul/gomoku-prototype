@@ -22,12 +22,12 @@ def checkGame(line):
 
 
 def numpyGame(line):
-    x = np.zeros(shape=(1, 17, 17), dtype="int8")
-    y = np.zeros(shape=(1, 17, 17), dtype="int8")
+    x = np.zeros(shape=(1, 16, 16), dtype="int8")
+    y = np.zeros(shape=(1, 16, 16), dtype="int8")
     y[0,8,8] = 1
     for i in range(len(line) // 2 - 1):
         currBoard = -np.copy(x[i,:,:] + y[i,:,:])
-        nextBoard = np.zeros(shape=(17, 17), dtype="int8")
+        nextBoard = np.zeros(shape=(16, 16), dtype="int8")
         nextBoard[int(line[i*2+2], 16), int(line[i*2+3], 16)] = 1
         x = np.concatenate((x, currBoard[np.newaxis,:,:]))
         y = np.concatenate((y, nextBoard[np.newaxis,:,:]))
@@ -75,6 +75,7 @@ if __name__ == '__main__':
         print("Total %d data ..." % len(total))
 
         # Multiprocess version
+        '''
         for idx in range(100000, len(total), 10000):
             if idx + 10000 >= len(total):
                 total_xy = Pool(8).map(proc, total[idx:])
@@ -86,16 +87,14 @@ if __name__ == '__main__':
             np.save("y_%d.npy" % idx, np.concatenate(total_y))
 
         '''
+        total = total[:1000]
         # Single process version
         total_x, total_y = numpyGame(total[0])
         for i in range(1, len(total)):
             if (i * 100 // len(total)) != ((i-1) * 100 // len(total)):
                 print("%d %% done" % (i * 100 // len(total)))
-            if i % 10000 == 0:
-                np.save("x.npy", total_x)
-                np.save("y.npy", total_y)
-                exit(1)
             x, y = numpyGame(total[i])
             x, y = augmentData(x), augmentData(y)
             total_x, total_y = np.concatenate((total_x, x)), np.concatenate((total_y, y))
-        '''
+        np.save("x.npy", total_x)
+        np.save("y.npy", total_y)
